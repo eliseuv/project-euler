@@ -2,7 +2,9 @@ import Control.Arrow ((***))
 import Control.Monad (join)
 
 -- Get a list with all the multiples of the integers in `as` below `n`
-multiples :: Integer -> [Integer] -> [Integer]
+multiples :: Integer -- ^ n
+  -> [Integer] -- ^ as
+  -> [Integer]
 multiples n as = [x | x <- [1 .. n - 1], any (\a -> mod x a == 0) as]
 
 -- Solution to euler1

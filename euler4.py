@@ -1,38 +1,11 @@
 import numpy as np
 
+import sys
+sys.path.append("..")
+from methods import *
+
 # Set of numbers to test functions
 TEST_SET = np.array([1, 5, 10, 11, 13, 232, 233, 423, 424, 1000, 1001, 998001])
-
-def to_ptr(n):
-  # Convert the number to string
-  n_str = str(n)
-  # Get digit count
-  l = len(n_str)
-  # Auxiliary variables
-  l_half_floor = np.floor(l/2).astype(int)
-  l_half_ceil = np.ceil(l/2).astype(int)
-  # Convert to palindrome tuple representation
-  return (n_str[:l_half_floor], n_str[l_half_floor:l_half_ceil], n_str[l_half_ceil:])
-
-def from_ptr(ptr):
-  # Just concatenate everything
-  return int(ptr[0] + ptr[1] + ptr[2])
-
-# print('Testing PTR...\n')
-# for n in TEST_SET:
-#   ptr = to_ptr(n)
-#   n_back = from_ptr(ptr)
-#   print('\t{} => {} => {}\n'.format(n, ptr, n_back))
-
-def is_palindrome(n):
-  # Convert to PTR
-  n_ptr = to_ptr(n)
-  # Perform check
-  return n_ptr[0] == n_ptr[2][::-1]
-
-# print('Testing is_palindrome...\n')
-# for n in TEST_SET:
-#   print('\t{} => {}\n'.format(n, is_palindrome(n)))
 
 def largest_palindrome_below(n):
   # Convert to PTR
