@@ -1,3 +1,9 @@
--- Point-free solution to the difference between the square of the sum and the sum of the squares of a given number
-solution :: Integral a => a -> a
-solution = 
+import Control.Monad (join)
+import Methods (mapTuple)
+
+-- Difference between the square of the sum and the sum of the squares of a given list of numbers
+solution :: Num a => [a] -> a
+solution = uncurry subtract . (`mapTuple` (sum . map square, square . sum)) . flip ($)
+  where
+    -- More point-free goodness :)
+    square = join (*)

@@ -1,15 +1,27 @@
---
-
 module Methods
-  ( findInList,
+  ( mapTuple,
+    findInList,
+    square,
     primes,
     primesBelow,
+    nthPrime,
     primeFactors,
     leastCommonMultiplier,
+    pythagoreanTriplets,
+    splitString,
+    eachLine,
   )
 where
 
+import Control.Arrow ((***))
+import Control.Monad (join)
 import Data.Maybe (fromMaybe)
+import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
+
+-- Map but for tuple
+-- https://stackoverflow.com/a/9723976
+mapTuple :: (a -> b) -> (a, a) -> (b, b)
+mapTuple = join (***)
 
 -- Find the first element satisfying a given condition in a given list
 -- If no such element is found return Nothing
@@ -18,6 +30,11 @@ findInList _ [] = Nothing
 findInList cond (x : xt)
   | cond x = Just x
   | otherwise = findInList cond xt
+
+-- Square a number:
+-- (\x -> x*x) but cooler
+square :: Num a => a -> a
+square = join (*)
 
 -- Integral square root
 integralSqrt :: Integral a => a -> a
@@ -36,6 +53,12 @@ primes = 2 : sieve primes [3, 5 ..]
 -- Get a list with all prime numbers below a given value
 primesBelow :: Integral a => a -> [a]
 primesBelow n = takeWhile (< n) primes
+
+-- Get the n-th prime number
+-- Primes are zero-idexed:
+-- 0 -> 2, 1 -> 3, 2 -> 5, ...
+nthPrime :: Integral a => Int -> a
+nthPrime = (!!) primes
 
 -- Calculate the prime factors of a given number
 -- Optimizations:
@@ -83,3 +106,41 @@ leastCommonMultiplier xs = lcmRec 1 primes xs'
         -- Divide all the numbers in a given list by `p` and filter the non-unitary values
         divFilterOnes :: Integral a => a -> [a] -> [a]
         divFilterOnes p = filter (/= 1) . map (\x -> if mod x p == 0 then div x p else x)
+
+-- List all Pythagorean triplets
+-- Using method outlined in 3b1b's video: https://www.youtube.com/watch?v=QJYmyhnaaek
+pythagoreanTriplets :: [(Int, Int, Int)]
+pythagoreanTriplets = [getTriplet x y | x <- [2 ..], y <- [1 .. (x - 1)]]
+  where
+    getTriplet :: Int -> Int -> (Int, Int, Int)
+    getTriplet x y = (a, b, c)
+      where
+        -- Complex number in lattice
+        z :: ComplexInteger Int
+        z = x :+ y
+        -- Complex number squared
+        z2 :: ComplexInteger Int
+        z2 = square z
+        -- Real part
+        a :: Int
+        a = realPart z2
+        -- Imaginary part
+        b :: Int
+        b = imagPart z2
+        -- Hypothenuse
+        c :: Int
+        c = magnitudeSq z
+
+-- Split string at a given separator character
+splitString :: Char -> String -> [String]
+splitString sep str = case dropWhile (== sep) str of
+  "" -> []
+  str' -> w : splitString sep str''
+    where
+      (w, str'') = break (== sep) str'
+
+-- Use to make IO interaction eager
+-- interact $ eachLine
+-- https://stackoverflow.com/a/37205614
+eachLine :: (String -> String) -> (String -> String)
+eachLine f = unlines . map f . lines
