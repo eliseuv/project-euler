@@ -7,16 +7,16 @@ module Methods
     nthPrime,
     primeFactors,
     leastCommonMultiplier,
-    pythagoreanTriplets,
+    pythagoreanTriples,
     splitString,
     eachLine,
   )
 where
 
+import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
 import Control.Arrow ((***))
 import Control.Monad (join)
 import Data.Maybe (fromMaybe)
-import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
 
 -- Map but for tuple
 -- https://stackoverflow.com/a/9723976
@@ -109,27 +109,31 @@ leastCommonMultiplier xs = lcmRec 1 primes xs'
 
 -- List all Pythagorean triplets
 -- Using method outlined in 3b1b's video: https://www.youtube.com/watch?v=QJYmyhnaaek
-pythagoreanTriplets :: [(Int, Int, Int)]
-pythagoreanTriplets = [getTriplet x y | x <- [2 ..], y <- [1 .. (x - 1)]]
+pythagoreanTriples :: [(Int, Int, Int)]
+pythagoreanTriples = halfTriples . orderFilter $ [getTriple x y | x <- [2 ..], y <- [1 .. (x - 1)]]
   where
-    getTriplet :: Int -> Int -> (Int, Int, Int)
-    getTriplet x y = (a, b, c)
+    -- Get Pythagorean triple associated with complex number `x + yi`
+    getTriple :: Int -> Int -> (Int, Int, Int)
+    getTriple x y = (a, b, c)
       where
         -- Complex number in lattice
         z :: ComplexInteger Int
         z = x :+ y
         -- Complex number squared
-        z2 :: ComplexInteger Int
         z2 = square z
         -- Real part
-        a :: Int
         a = realPart z2
         -- Imaginary part
-        b :: Int
         b = imagPart z2
-        -- Hypothenuse
-        c :: Int
+        -- Hypotenuse
         c = magnitudeSq z
+    -- Keep only the triples with `a < b < c`
+    orderFilter :: [(Int, Int, Int)] -> [(Int, Int, Int)]
+    orderFilter = filter (\(a, b, _) -> a < b)
+    -- Half the whole triple if possible
+    halfTriples :: [(Int, Int, Int)] -> [(Int, Int, Int)]
+    halfTriples [] = error "We somehow ran out of Pythagorean triples!"
+    halfTriples (t@(a, b, c) : tt) = (if all even [a, b, c] then (div a 2, div b 2, div c 2) else t) : halfTriples tt
 
 -- Split string at a given separator character
 splitString :: Char -> String -> [String]
