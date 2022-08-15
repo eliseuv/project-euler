@@ -1,19 +1,33 @@
 module Methods
   ( mapTuple,
+    -- List outils
     findInList,
+    splitString,
+    transpose,
+    -- Simple numerics
     square,
+    integralSqrt,
+    -- Numerics on lists
+    maximumAdjacentProduct,
+    -- Prime numbers
     primes,
     primesBelow,
     nthPrime,
     primeFactors,
+    -- LCM
     leastCommonMultiplier,
+    -- Pythagorean triples
     pythagoreanTriples,
-    splitString,
+    -- String utils
+    readLines,
+    -- IO
     eachLine,
+    interactSolution,
   )
 where
 
 import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
+import Control.Applicative (ZipList (..))
 import Control.Arrow ((***))
 import Control.Monad (join)
 import Data.Maybe (fromMaybe)
@@ -31,6 +45,20 @@ findInList cond (x : xt)
   | cond x = Just x
   | otherwise = findInList cond xt
 
+-- Split a list at every element for which a predicate `p` is true, ommiting that element
+splitList :: (a -> Bool) -> [a] -> [[a]]
+splitList _ [] = []
+splitList p xs =
+  let (ms, rs) = break p xs
+   in case rs of
+        [] -> [ms]
+        _ -> ms : splitList p (tail rs)
+
+-- Transpose a list of lists
+-- https://riptutorial.com/haskell/example/17898/transposing-a-list-of-lists
+transpose :: [[a]] -> [[a]]
+transpose = getZipList . traverse ZipList
+
 -- Square a number:
 -- (\x -> x*x) but cooler
 square :: Num a => a -> a
@@ -39,6 +67,59 @@ square = join (*)
 -- Integral square root
 integralSqrt :: Integral a => a -> a
 integralSqrt = floor . sqrt . fromIntegral
+
+-- -- Find the largest product of `len` adjacent values in a list
+-- maximumAdjacentProduct :: Integral a => [a] -> Int -> a
+-- maximumAdjacentProduct xs len = maximum . map (ssMaxProd len) $ subseqs
+--   where
+--     -- Generate subsequences without any zeros and discard subsequences that are too short
+--     subseqs = filter (\ss -> length ss >= len) . splitList (== 0) $ xs
+--     -- Calculate the maximum product for a given subsequence
+--     ssMaxProd len ss = ssMaxProdRec initialProduct ssFront ssBack
+--       where
+--         -- The initial product is the product of the first `len` values
+--         initialProduct = product . take len $ ss
+--         -- List of values to be divded by in order
+--         ssFront = take (length ss - len) ss
+--         -- List of values to be multiplied by in order
+--         ssBack = drop len ss
+--         -- Recursively update product value using the provided lists `front` and `back`,
+--         -- Base case: return product when there are no digits in the front or the back
+--         ssMaxProdRec prod [] [] = prod
+--         -- Error cases: Should not be reached
+--         ssMaxProdRec prod [] _ = error "Ran out of front values!"
+--         ssMaxProdRec prod _ [] = error "Ran out of back values!"
+--         -- Recursive case: performs some kind of "moving product",
+--         -- dividing by the first `front value` and multiplying by the first `back value`
+--         ssMaxProdRec prod (f : ft) (b : bt) = ssMaxProdRec newProd ft bt
+--           where
+--             newProd = div prod f * b
+
+-- Find the largest product of `len` adjacent values in a list
+maximumAdjacentProduct :: Integral a => [a] -> Int -> a
+maximumAdjacentProduct xs len = maximum . map (ssMaxProd len) $ subseqs
+  where
+    -- Generate subsequences without any zeros and discard subsequences that are too short
+    subseqs = filter (\ss -> length ss >= len) . splitList (== 0) $ xs
+    -- Calculate the maximum product for a given subsequence
+    ssMaxProd len ss = ssMaxProdRec initialProduct terms
+      where
+        -- The initial product is the product of the first `len` values
+        initialProduct = product . take len $ ss
+        terms = zip divVals multVals
+          where
+            -- List of values to be divded by in order
+            divVals = take (length ss - len) ss
+            -- List of values to be multiplied by in order
+            multVals = drop len ss
+        -- Recursively update product value using the provided lists `front` and `back`,
+        -- Base case: return product when there are no digits in the front or the back
+        ssMaxProdRec prod [] = prod
+        -- Recursive case: performs some kind of "moving product",
+        -- dividing by the first `front value` and multiplying by the first `back value`
+        ssMaxProdRec prod ((f, b) : ts) = ssMaxProdRec newProd ts
+          where
+            newProd = div prod f * b
 
 -- Postponed Turner's sieve
 -- https://wiki.haskell.org/index.php?title=Prime_numbers#Postponed_Filters
@@ -143,8 +224,17 @@ splitString sep str = case dropWhile (== sep) str of
     where
       (w, str'') = break (== sep) str'
 
+-- Read string line by line assuming the char `sep` as field separator
+-- Returns a list of lines read, each line read being a list of fields
+readLines :: Read a => Char -> String -> [[a]]
+readLines sep = map (map read . splitString sep) . lines
+
 -- Use to make IO interaction eager
--- interact $ eachLine
+-- Usage: interact $ eachLine
 -- https://stackoverflow.com/a/37205614
 eachLine :: (String -> String) -> (String -> String)
 eachLine f = unlines . map f . lines
+
+-- Interact eagerly with a problem solution
+interactSolution :: (Read a, Show b) => (a -> b) -> IO ()
+interactSolution sol = interact $ eachLine $ show . sol . read
