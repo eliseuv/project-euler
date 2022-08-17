@@ -1,0 +1,10 @@
+# Ignore files without extension
+*
+!/**/
+!*.*
+
+# Ignore Haskell interface files
+*.hi
+
+# Ignore object files
+*.o

@@ -5,12 +5,16 @@ import Methods (interactSolution, maximumAdjacentProduct)
 solution :: [Int] -> Int -> Int
 solution = maximumAdjacentProduct
 
+-- Parse string to list of digits
+parseDigitsList :: Read a => String -> [a]
+parseDigitsList = map (\c -> read [c]) . filter (not . isSpace)
+
 -- Use solution
 main :: IO ()
 main = do
   -- Read file
   strInput <- readFile "euler8.txt"
   -- Parse list of digits
-  let vals = map (\c -> read [c]) . filter (not . isSpace) $ strInput
+  let vals = parseDigitsList strInput
   -- Interact with solution
   interactSolution $ solution vals

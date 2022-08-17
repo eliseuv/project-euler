@@ -1,24 +1,33 @@
 module Methods
-  ( mapTuple,
+  ( -- Tuple utils
+    mapTuple,
+    toSnd,
+    fmapToSnd,
     -- List outils
+    uniq,
     findInList,
     splitString,
-    transpose,
+    -- Matrix utils
+    transpose',
+    diagonals,
     -- Simple numerics
     square,
     integralSqrt,
     -- Numerics on lists
+    mapMax,
     maximumAdjacentProduct,
     -- Prime numbers
     primes,
     primesBelow,
     nthPrime,
     primeFactors,
+    primeFactorsCount,
     -- LCM
     leastCommonMultiplier,
-    -- Pythagorean triples
+    -- Interesting sequences
     pythagoreanTriples,
-    -- String utils
+    triangularNumbers,
+    -- Strings
     readLines,
     -- IO
     eachLine,
@@ -30,12 +39,20 @@ import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
 import Control.Applicative (ZipList (..))
 import Control.Arrow ((***))
 import Control.Monad (join)
+import Data.List (foldl', foldl1', group, scanl', scanl1, transpose)
 import Data.Maybe (fromMaybe)
+import GHC.List (errorEmptyList)
 
 -- Map but for tuple
 -- https://stackoverflow.com/a/9723976
 mapTuple :: (a -> b) -> (a, a) -> (b, b)
 mapTuple = join (***)
+
+toSnd :: (a -> b) -> a -> (a, b)
+toSnd f x = (x, f x)
+
+fmapToSnd :: Functor f => (a -> b) -> f a -> f (a, b)
+fmapToSnd = fmap . toSnd
 
 -- Find the first element satisfying a given condition in a given list
 -- If no such element is found return Nothing
@@ -44,6 +61,13 @@ findInList _ [] = Nothing
 findInList cond (x : xt)
   | cond x = Just x
   | otherwise = findInList cond xt
+
+-- Ignore repeated sequences in a list
+-- Has the effect of keeping only one instance of each element when applied to a sorted list
+-- Same as `uniq` unix tool
+-- https://hackage.haskell.org/package/Unique-0.4.7.9/docs/Data-List-Unique.html#v:uniq
+uniq :: Eq a => [a] -> [a]
+uniq = map head . group
 
 -- Split a list at every element for which a predicate `p` is true, ommiting that element
 splitList :: (a -> Bool) -> [a] -> [[a]]
@@ -56,8 +80,20 @@ splitList p xs =
 
 -- Transpose a list of lists
 -- https://riptutorial.com/haskell/example/17898/transposing-a-list-of-lists
-transpose :: [[a]] -> [[a]]
-transpose = getZipList . traverse ZipList
+transpose' :: [[a]] -> [[a]]
+transpose' = getZipList . traverse ZipList
+
+-- Get diagonals from matrix represented as a list of lists
+-- https://hackage.haskell.org/package/universe-base-1.0.2.1/docs/src/Data-Universe-Helpers.html#diagonals
+diagonals :: [[a]] -> [[a]]
+diagonals = tail . go []
+  where
+    go b es_ =
+      [h | h : _ <- b] : case es_ of
+        [] -> transpose ts
+        e : es -> go (e : ts) es
+      where
+        ts = [t | _ : t <- b]
 
 -- Square a number:
 -- (\x -> x*x) but cooler
@@ -68,58 +104,37 @@ square = join (*)
 integralSqrt :: Integral a => a -> a
 integralSqrt = floor . sqrt . fromIntegral
 
--- -- Find the largest product of `len` adjacent values in a list
--- maximumAdjacentProduct :: Integral a => [a] -> Int -> a
--- maximumAdjacentProduct xs len = maximum . map (ssMaxProd len) $ subseqs
---   where
---     -- Generate subsequences without any zeros and discard subsequences that are too short
---     subseqs = filter (\ss -> length ss >= len) . splitList (== 0) $ xs
---     -- Calculate the maximum product for a given subsequence
---     ssMaxProd len ss = ssMaxProdRec initialProduct ssFront ssBack
---       where
---         -- The initial product is the product of the first `len` values
---         initialProduct = product . take len $ ss
---         -- List of values to be divded by in order
---         ssFront = take (length ss - len) ss
---         -- List of values to be multiplied by in order
---         ssBack = drop len ss
---         -- Recursively update product value using the provided lists `front` and `back`,
---         -- Base case: return product when there are no digits in the front or the back
---         ssMaxProdRec prod [] [] = prod
---         -- Error cases: Should not be reached
---         ssMaxProdRec prod [] _ = error "Ran out of front values!"
---         ssMaxProdRec prod _ [] = error "Ran out of back values!"
---         -- Recursive case: performs some kind of "moving product",
---         -- dividing by the first `front value` and multiplying by the first `back value`
---         ssMaxProdRec prod (f : ft) (b : bt) = ssMaxProdRec newProd ft bt
---           where
---             newProd = div prod f * b
+-- Maximum value of a function when applied to a given list
+-- `mapMax f` is equivalent to `maximum . map f` but using `foldl'`
+mapMax :: (Ord b) => (a -> b) -> [a] -> b
+mapMax f (xh : xt) = foldl' (\y x -> max y (f x)) (f xh) xt
+mapMax _ [] = errorEmptyList "mapMax"
 
--- Find the largest product of `len` adjacent values in a list
+-- Find the largest product of `len` adjacent values in a list of integers
 maximumAdjacentProduct :: Integral a => [a] -> Int -> a
-maximumAdjacentProduct xs len = maximum . map (ssMaxProd len) $ subseqs
+maximumAdjacentProduct xs len = mapMax (maxProd len) subseqs
   where
     -- Generate subsequences without any zeros and discard subsequences that are too short
     subseqs = filter (\ss -> length ss >= len) . splitList (== 0) $ xs
-    -- Calculate the maximum product for a given subsequence
-    ssMaxProd len ss = ssMaxProdRec initialProduct terms
+    -- Calculate the maximum product of adjacent values in a list of integers,
+    -- assuming the list is long enough and there are no zeros.
+    maxProd :: Integral a => Int -> [a] -> a
+    maxProd len ss = maximum $ scanl' divMult initProd divMultTerms
       where
         -- The initial product is the product of the first `len` values
-        initialProduct = product . take len $ ss
-        terms = zip divVals multVals
+        initProd = product . take len $ ss
+        -- Takes a value, divides by tuple fst and multiply tuple snd
+        divMult :: Integral a => a -> (a, a) -> a
+        divMult p (d, m) = div p d * m
+        -- List of tuples of values to divide and multiply
+        divMultTerms = zip divVals multVals
           where
             -- List of values to be divded by in order
-            divVals = take (length ss - len) ss
+            divVals =
+              let n = length ss
+               in take (n - len) ss
             -- List of values to be multiplied by in order
             multVals = drop len ss
-        -- Recursively update product value using the provided lists `front` and `back`,
-        -- Base case: return product when there are no digits in the front or the back
-        ssMaxProdRec prod [] = prod
-        -- Recursive case: performs some kind of "moving product",
-        -- dividing by the first `front value` and multiplying by the first `back value`
-        ssMaxProdRec prod ((f, b) : ts) = ssMaxProdRec newProd ts
-          where
-            newProd = div prod f * b
 
 -- Postponed Turner's sieve
 -- https://wiki.haskell.org/index.php?title=Prime_numbers#Postponed_Filters
@@ -160,6 +175,10 @@ primeFactors n = factorsRec n
         factor = fromMaybe n maybeFactor
           where
             maybeFactor = findInList ((== 0) . mod n) primesConsidered
+
+-- Count the number of prime factors of given integer
+primeFactorsCount :: Integral a => a -> Int
+primeFactorsCount = length . uniq . primeFactors
 
 -- Least common multiplier of list of integers
 -- i.e. the smallest integer that is divisible by all of them
@@ -215,6 +234,11 @@ pythagoreanTriples = halfTriples . orderFilter $ [getTriple x y | x <- [2 ..], y
     halfTriples :: [(Int, Int, Int)] -> [(Int, Int, Int)]
     halfTriples [] = error "We somehow ran out of Pythagorean triples!"
     halfTriples (t@(a, b, c) : tt) = (if all even [a, b, c] then (div a 2, div b 2, div c 2) else t) : halfTriples tt
+
+-- Triangular numbers:
+-- T_n = \sum_{k=0}^n k
+triangularNumbers :: Integral a => [a]
+triangularNumbers = map (\n -> div (n * (n - 1)) 2) [0 ..]
 
 -- Split string at a given separator character
 splitString :: Char -> String -> [String]

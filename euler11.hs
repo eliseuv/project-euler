@@ -1,11 +1,26 @@
-import Methods (interactSolution, maximumAdjacentProduct, readLines, transpose)
+import Data.List (foldl')
+import Methods (diagonals, interactSolution, mapMax, maximumAdjacentProduct, readLines, transpose')
 
+-- Find the largest adjacent product for a square grid of integers
+-- given as a list of each of its lines `gridLines` of length `len`
+-- The adjacent product can be calculated in any of the following directions:
+--  - Horizontally
+--  - Vertically
+--  - Diagonally (positive and negative)
 solution :: Integral a => [[a]] -> Int -> a
-solution gridLines len = maximum . map (maximum . map (`maximumAdjacentProduct` len)) $ [gridLines, gridCols]
+solution gridLines len = mapMax (mapMax (`maximumAdjacentProduct` len)) [gridLines, gridCols, posDiags, negDiags]
   where
-    gridCols = transpose gridLines
-
--- posDiags =
+    -- Lists of 1D sequences to look for maximum adjacent product:
+    -- The list of grid lines `gridLines` itself.
+    -- List of grid columns
+    gridCols = transpose' gridLines
+    -- List of positive diagonals
+    posDiags = dropSmall . diagonals $ gridLines
+    -- List of negative diagonals
+    negDiags = dropSmall . diagonals . map reverse $ gridLines
+    -- Remove lists smaller than the desired adjacent sequence length
+    dropSmall :: [[a]] -> [[a]]
+    dropSmall = filter (\xs -> length xs >= len)
 
 main :: IO ()
 main = do

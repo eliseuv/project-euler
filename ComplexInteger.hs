@@ -1,5 +1,3 @@
---
-
 module ComplexInteger
   ( ComplexInteger ((:+)),
     realPart,
