@@ -1,10 +1,7 @@
-import Methods (findInList, fmapToSnd, interactSolution, triangularNumbers)
+import Methods (divisorsCount, findInList, fmapToSnd, interactSolution, triangularNumbers)
 
--- solution :: Integral a => Int -> Maybe (a, Int)
-solution k = findInList ((> (k - 2)) . snd) . fmapToSnd (length . divisors) $ tail triangularNumbers
-  where
-    divisors :: Integral a => a -> [a]
-    divisors n = filter (\x -> mod n x == 0) [2 .. div n 2]
+solution :: Integral a => Int -> Maybe (a, Int)
+solution k = findInList ((> k) . snd) . fmapToSnd divisorsCount $ triangularNumbers
 
 main :: IO ()
 main = do

@@ -1,6 +1,7 @@
 module Methods
   ( -- Tuple utils
     mapTuple,
+    toFst,
     toSnd,
     fmapToSnd,
     -- List outils
@@ -24,9 +25,12 @@ module Methods
     primeFactorsCount,
     -- LCM
     leastCommonMultiplier,
+    -- Divisors
+    divisorsCount,
     -- Interesting sequences
     pythagoreanTriples,
     triangularNumbers,
+    fibonacciNumbers,
     -- Strings
     readLines,
     -- IO
@@ -47,6 +51,9 @@ import GHC.List (errorEmptyList)
 -- https://stackoverflow.com/a/9723976
 mapTuple :: (a -> b) -> (a, a) -> (b, b)
 mapTuple = join (***)
+
+toFst :: (a -> b) -> a -> (b, a)
+toFst f x = (f x, x)
 
 toSnd :: (a -> b) -> a -> (a, b)
 toSnd f x = (x, f x)
@@ -207,6 +214,20 @@ leastCommonMultiplier xs = lcmRec 1 primes xs'
         divFilterOnes :: Integral a => a -> [a] -> [a]
         divFilterOnes p = filter (/= 1) . map (\x -> if mod x p == 0 then div x p else x)
 
+-- Number of divisors of a given integer
+divisorsCount :: Integral a => a -> Int
+divisorsCount n = 2 * (divs + 1) + if isPerfectSquare then 1 else 0
+  where
+    -- The quare root of `n`
+    nSqrt :: Double
+    nSqrt = sqrt . fromIntegral $ n
+    -- Is `n` a perfect square
+    isPerfectSquare :: Bool
+    isPerfectSquare = nSqrt == (fromIntegral . floor $ nSqrt)
+    -- Number of divisors between 2 and sqrt{n}
+    divs :: Int
+    divs = length . filter (== 0) . map (mod n) $ [2 .. (floor nSqrt - 1)]
+
 -- List all Pythagorean triplets
 -- Using method outlined in 3b1b's video: https://www.youtube.com/watch?v=QJYmyhnaaek
 pythagoreanTriples :: [(Int, Int, Int)]
@@ -238,7 +259,13 @@ pythagoreanTriples = halfTriples . orderFilter $ [getTriple x y | x <- [2 ..], y
 -- Triangular numbers:
 -- T_n = \sum_{k=0}^n k
 triangularNumbers :: Integral a => [a]
-triangularNumbers = map (\n -> div (n * (n - 1)) 2) [0 ..]
+triangularNumbers = 0 : next 2 1
+  where
+    next n t = t : next (n + 1) (t + n)
+
+-- Fibonacci numbers
+fibonacciNumbers :: Integral a => [a]
+fibonacciNumbers = 0 : 1 : zipWith (+) (tail fibonacciNumbers) fibonacciNumbers
 
 -- Split string at a given separator character
 splitString :: Char -> String -> [String]
