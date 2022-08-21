@@ -14,6 +14,9 @@ module Methods
     -- Simple numerics
     square,
     integralSqrt,
+    factorial,
+    -- Asbitrary procision integer operation
+    integerOperation,
     -- Numerics on lists
     mapMax,
     maximumAdjacentProduct,
@@ -31,8 +34,10 @@ module Methods
     pythagoreanTriples,
     triangularNumbers,
     fibonacciNumbers,
+    collatzSeq,
     -- Strings
     readLines,
+    readDigits,
     -- IO
     eachLine,
     interactSolution,
@@ -110,6 +115,29 @@ square = join (*)
 -- Integral square root
 integralSqrt :: Integral a => a -> a
 integralSqrt = floor . sqrt . fromIntegral
+
+-- Factorial
+factorial :: Integral a => a -> a
+factorial n = next n 1
+  where
+    next 0 f = f
+    next n f = next (n - 1) (n * f)
+
+-- Arbitrary precision integer operation
+integerOperation :: (Int -> Int) -> String -> String
+integerOperation op = concatMap show . reverse . decimalPropagate . reverse . map op . readDigits
+  where
+    -- Digits propagation part of the sum algorithm
+    -- The most significant digits are assumed to be at the front
+    decimalPropagate :: [Int] -> [Int]
+    decimalPropagate = propagate
+      where
+        propagate [] = []
+        propagate [xf] = [xf]
+        propagate (x : xd : xt) = xUnit : decimalPropagate (xd + xDec : xt)
+          where
+            -- xTens and xUnits are the quotient and the rest, respectively, of x divided by 10
+            (xDec, xUnit) = divMod x 10
 
 -- Maximum value of a function when applied to a given list
 -- `mapMax f` is equivalent to `maximum . map f` but using `foldl'`
@@ -267,6 +295,17 @@ triangularNumbers = 0 : next 2 1
 fibonacciNumbers :: Integral a => [a]
 fibonacciNumbers = 0 : 1 : zipWith (+) (tail fibonacciNumbers) fibonacciNumbers
 
+-- Collatz sequence
+collatzSeq :: Integral a => a -> [a]
+collatzSeq x = x : sequence x
+  where
+    sequence :: Integral a => a -> [a]
+    sequence n = next : sequence next
+      where
+        next
+          | even n = div n 2
+          | otherwise = 3 * n + 1
+
 -- Split string at a given separator character
 splitString :: Char -> String -> [String]
 splitString sep str = case dropWhile (== sep) str of
@@ -279,6 +318,10 @@ splitString sep str = case dropWhile (== sep) str of
 -- Returns a list of lines read, each line read being a list of fields
 readLines :: Read a => Char -> String -> [[a]]
 readLines sep = map (map read . splitString sep) . lines
+
+-- Parse string to a list of digits
+readDigits :: String -> [Int]
+readDigits = map (\c -> read [c])
 
 -- Use to make IO interaction eager
 -- Usage: interact $ eachLine
