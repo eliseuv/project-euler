@@ -33,7 +33,11 @@ sayNumber = sayTuple . decimalTuple
         optAnd = case c of
           10 -> ""
           0 -> ""
-          _ -> "and"
+          _ -> case d of
+            0 -> case u of
+              0 -> ""
+              _ -> "and"
+            _ -> "and"
         decWord = case d of
           1 -> case u of
             0 -> "ten"
@@ -65,4 +69,6 @@ sayNumber = sayTuple . decimalTuple
             _ -> sayUnit u
 
 solution :: Int
-solution = length . concatMap sayNumber $ [0 .. 1000]
+solution = length . concatMap sayNumber $ [1 .. 1000]
+
+solution' = map sayNumber [1 .. 1000]
