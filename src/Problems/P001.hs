@@ -1,3 +1,5 @@
+module Problems.P001 where
+
 import Control.Arrow ((***))
 import Control.Monad (join)
 

@@ -1,14 +1,4 @@
-# Ignore files without extension
-*
-!/**/
-!*.*
-
-# Ignore Haskell interface files
-*.hi
-
-# Ignore object files
-*.o
-
-# devenv
 .direnv/
 .envrc
+
+dist-*/

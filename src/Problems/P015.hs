@@ -1,4 +1,6 @@
-import Methods (factorial, square)
+module Problems.P015 where
+
+import Shared.Methods (factorial, square)
 
 -- Solution is equivalent to finding the number of anagrams of `n` R's and `n` D's
 -- S = (2n)!/(n!n!)

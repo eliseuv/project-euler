@@ -1,3 +1,5 @@
+module Problems.P003 where
+
 import Data.List (find)
 import Data.Maybe (fromJust, fromMaybe)
 

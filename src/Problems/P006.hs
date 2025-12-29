@@ -1,5 +1,7 @@
+module Problems.P006 where
+
 import Control.Monad (join)
-import Methods (mapTuple)
+import Shared.Methods (mapTuple)
 
 -- Difference between the square of the sum and the sum of the squares of a given list of numbers
 solution :: Num a => [a] -> a

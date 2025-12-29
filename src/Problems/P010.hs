@@ -1,4 +1,6 @@
-import Methods (eachLine, primesBelow)
+module Problems.P010 where
+
+import Shared.Methods (eachLine, primesBelow)
 
 -- Sum of all primes below a given number
 solution :: Integral a => a -> a

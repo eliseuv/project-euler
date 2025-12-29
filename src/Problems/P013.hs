@@ -1,5 +1,7 @@
+module Problems.P013 where
+
 import Data.List (intersperse, transpose)
-import Methods (interactSolution, readLines, splitString)
+import Shared.Methods (interactSolution, readLines, splitString)
 
 -- Cheated solution using arbitrary precision integers
 cheatedSolution :: [String] -> Int -> String
@@ -29,7 +31,7 @@ legitSolution xs l = take l . concatMap show . reverse . decimalPropagate . reve
 main :: IO ()
 main = do
   -- Read text file
-  strInput <- readFile "euler13.txt"
+  strInput <- readFile "data/P013.txt"
   let bigNums = lines strInput
   -- -- Cheated solution with arbitrary precision integers
   -- interactSolution $ cheatedSolution bigNums

@@ -1,3 +1,5 @@
+module Problems.P004 where
+
 import Data.Char (digitToInt)
 import Data.List (find)
 import Data.Maybe (fromMaybe)

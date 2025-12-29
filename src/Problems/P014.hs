@@ -1,6 +1,8 @@
+module Problems.P014 where
+
 import Data.List (maximumBy)
 import Data.Ord (comparing)
-import Methods (collatzSeq, fmapToSnd)
+import Shared.Methods (collatzSeq, fmapToSnd)
 
 -- Find the integer below `n` that produces the largest collatz chain
 solution :: (Integral a, Num a) => a -> (a, Int)

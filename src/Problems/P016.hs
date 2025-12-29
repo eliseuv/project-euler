@@ -1,4 +1,6 @@
-import Methods (integerOperation, readDigits)
+module Problems.P016 where
+
+import Shared.Methods (integerOperation, readDigits)
 
 -- Cheated solution using arbitrary precision integers
 cheatedSolution :: Int -> Int

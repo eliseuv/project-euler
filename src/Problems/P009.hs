@@ -1,6 +1,8 @@
+module Problems.P009 where
+
 import Data.List (find)
 import Data.Maybe (fromMaybe)
-import Methods (pythagoreanTriples)
+import Shared.Methods (pythagoreanTriples)
 
 -- Find a Pythagorean triple that sums to `n` and return its product
 solution :: Int -> ((Int, Int, Int), Int)

@@ -1,0 +1,43 @@
+* Project Euler Solutions (Haskell)
+
+This repository contains solutions to Project Euler problems in Haskell.
+
+** Project Structure
+
+- =src/Shared/=: Shared utility modules (=Methods.hs=, =ComplexInteger.hs=).
+- =src/Problems/=: Solutions for each problem (=P001.hs=, =P002.hs=, etc.).
+- =data/=: Input data files for problems.
+- =python/=: Python solutions (moved from root).
+
+** How to Run
+
+*** Using Cabal
+
+Start a REPL to interact with the solutions:
+
+#+begin_src sh
+cabal repl
+#+end_src
+
+Then, inside the REPL, import the problem module you want to solve:
+
+#+begin_src haskell
+λ> import Problems.P001
+λ> solution 1000 [3,5]
+233168
+#+end_src
+
+Or for problems with a =main= function (e.g., P013):
+
+#+begin_src haskell
+λ> import Problems.P013
+λ> main
+#+end_src
+
+*** Using Nix
+
+This project is set up with Nix. You can enter the development shell:
+
+#+begin_src sh
+nix develop
+#+end_src

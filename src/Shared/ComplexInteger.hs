@@ -1,4 +1,4 @@
-module ComplexInteger
+module Shared.ComplexInteger
   ( ComplexInteger ((:+)),
     realPart,
     imagPart,

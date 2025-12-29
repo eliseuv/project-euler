@@ -1,0 +1,7 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:project-euler"
+
+    - path: "app/Main.hs"
+      component: "project-euler:exe:project-euler"

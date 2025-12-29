@@ -1,5 +1,7 @@
+module Problems.P011 where
+
 import Data.List (foldl')
-import Methods (diagonals, interactSolution, mapMax, maximumAdjacentProduct, readLines, transpose')
+import Shared.Methods (diagonals, interactSolution, mapMax, maximumAdjacentProduct, readLines, transpose')
 
 -- Find the largest adjacent product for a square grid of integers
 -- given as a list of each of its lines `gridLines` of length `len`
@@ -25,7 +27,7 @@ solution gridLines len = mapMax (mapMax (`maximumAdjacentProduct` len)) [gridLin
 main :: IO ()
 main = do
   -- Read text file
-  strInput <- readFile "euler11.txt"
+  strInput <- readFile "data/P011.txt"
   -- Parse grid
   let gridLines = readLines ' ' strInput :: [[Int]]
   -- Interact with solution

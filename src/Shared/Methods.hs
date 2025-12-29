@@ -1,4 +1,4 @@
-module Methods (
+module Shared.Methods (
     -- Tuple utils
     mapTuple,
     toFst,
@@ -44,7 +44,7 @@ module Methods (
 )
 where
 
-import ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
+import Shared.ComplexInteger (ComplexInteger ((:+)), imagPart, magnitudeSq, realPart)
 import Control.Applicative (ZipList (..))
 import Control.Arrow ((***))
 import Control.Monad (join)

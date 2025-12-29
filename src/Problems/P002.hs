@@ -1,3 +1,5 @@
+module Problems.P002 where
+
 -- Project Euler problem 2
 -- https://projecteuler.net/problem=2
 
