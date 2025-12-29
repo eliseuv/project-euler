@@ -8,3 +8,7 @@
 
 # Ignore object files
 *.o
+
+# devenv
+.direnv/
+.envrc
